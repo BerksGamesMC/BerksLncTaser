@@ -5,71 +5,126 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Giriş Sistemi - Yakında</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { background: #fff; padding: 2.5rem; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); width: 380px; min-height: 300px; display: flex; flex-direction: column; justify-content: center; }
-        h2 { text-align: center; color: #1c1e21; margin-bottom: 10px; }
-        p.subtitle { text-align: center; color: #606770; margin-bottom: 20px; font-size: 14px; }
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #dddfe2; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
-        button { width: 100%; padding: 12px; background-color: #0866ff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 10px; transition: 0.2s; }
-        button:hover { background-color: #0055d4; }
-        .logout-btn { background-color: #dc3545; }
-        .logout-btn:hover { background-color: #bb2d3b; }
-        .message-box { margin-bottom: 15px; padding: 10px; border-radius: 4px; font-size: 13px; display: none; text-align: center; }
-        .error { display: block; background-color: #ffebe8; color: #d0342c; border: 1px solid #dd3c104d; }
-        .success { display: block; background-color: #e7f3ff; color: #0866ff; border: 1px solid #0866ff4d; }
-        .toggle-link { text-align: center; margin-top: 20px; font-size: 14px; color: #606770; }
-        .toggle-link span { color: #0866ff; cursor: pointer; font-weight: 600; }
-        .forgot-pass { display: block; margin-top: 5px; font-size: 13px; color: #0866ff; cursor: pointer; text-align: right; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: #fff; padding: 2rem; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); width: 350px; text-align: center; }
+        h2 { margin-top: 0; color: #1c1e21; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #0866ff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 10px; }
+        button:hover { background: #0055d4; }
+        .logout-btn { background: #dc3545; }
+        .msg { margin: 10px 0; padding: 10px; border-radius: 4px; font-size: 13px; display: none; }
+        .error { display: block; background: #ffebe8; color: #d0342c; }
+        .success { display: block; background: #e7f3ff; color: #0866ff; }
+        .link { color: #0866ff; cursor: pointer; font-size: 14px; margin-top: 15px; display: inline-block; }
         .hidden { display: none !important; }
-        .coming-soon-box { text-align: center; }
-        .coming-soon-box h1 { color: #0866ff; font-size: 28px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="info-msg" class="message-box"></div>
+    <div id="info-msg" class="msg"></div>
 
-    <div id="login-area">
+    <div id="login-box">
         <h2>Giriş Yap</h2>
-        <input type="email" id="login-email" placeholder="E-posta Adresi">
-        <input type="password" id="login-password" placeholder="Şifre">
-        <span class="forgot-pass" id="btn-forgot-pw">Şifremi Unuttum?</span>
-        <button id="btn-login">Giriş Yap</button>
-        <div class="toggle-link">Hesabınız yok mu? <span onclick="showRegister()">Kaydol</span></div>
+        <input type="email" id="l-email" placeholder="E-posta">
+        <input type="password" id="l-pass" placeholder="Şifre">
+        <button id="btn-login">Giriş</button>
+        <span class="link" id="btn-reset">Şifremi Unuttum</span><br>
+        <span class="link" onclick="toggleView(false)">Hesabınız yok mu? Kaydol</span>
     </div>
 
-    <div id="register-area" class="hidden">
+    <div id="reg-box" class="hidden">
         <h2>Kaydol</h2>
-        <input type="email" id="reg-email" placeholder="E-posta Adresi">
-        <input type="password" id="reg-password" placeholder="Şifre (Min. 6 karakter)">
-        <button id="btn-register">Hesap Oluştur</button>
-        <div class="toggle-link">Zaten hesabınız var mı? <span onclick="showLogin()">Giriş Yap</span></div>
+        <input type="email" id="r-email" placeholder="E-posta">
+        <input type="password" id="r-pass" placeholder="Şifre (Min 6 karakter)">
+        <button id="btn-reg">Hesap Oluştur</button>
+        <span class="link" onclick="toggleView(true)">Zaten hesabınız var mı? Giriş Yap</span>
     </div>
 
-    <div id="dashboard-area" class="hidden">
-        <div class="coming-soon-box">
-            <h1>Çok Yakında!</h1>
-            <p class="subtitle">Uygulamamız şu an geliştirme aşamasındadır. Takipte kaldığınız için teşekkürler.</p>
-            <button id="btn-logout" class="logout-btn">Çıkış Yap</button>
-        </div>
+    <div id="dash-box" class="hidden">
+        <h1 style="color:#0866ff">Çok Yakında!</h1>
+        <p>Uygulamamız geliştirme aşamasındadır.</p>
+        <button id="btn-logout" class="logout-btn">Çıkış Yap</button>
     </div>
 </div>
 
-<script type="module" src="app.js"></script>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, onAuthStateChanged, signOut } 
+    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-<script>
-    // Sayfa içi geçişleri yöneten basit fonksiyonlar
-    window.showRegister = function() {
-        document.getElementById('login-area').classList.add('hidden');
-        document.getElementById('register-area').classList.remove('hidden');
-        document.getElementById('info-msg').style.display = 'none';
+    const firebaseConfig = {
+        apiKey: "AIzaSyDky0jC4vlRZ66D10kp8GEXXryymaPFY2Q",
+        authDomain: "berks-47dbc.firebaseapp.com",
+        projectId: "berks-47dbc",
+        storageBucket: "berks-47dbc.firebasestorage.app",
+        messagingSenderId: "384612310366",
+        appId: "1:384612310366:web:6fe0e771f389782270c3cf",
+        measurementId: "G-FBYH92LHQ4"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const msgBox = document.getElementById('info-msg');
+
+    function showMsg(txt, err = true) {
+        msgBox.textContent = txt;
+        msgBox.className = err ? "msg error" : "msg success";
+        msgBox.style.display = "block";
     }
-    window.showLogin = function() {
-        document.getElementById('register-area').classList.add('hidden');
-        document.getElementById('login-area').classList.remove('hidden');
-        document.getElementById('info-msg').style.display = 'none';
-    }
+
+    window.toggleView = (isLogin) => {
+        document.getElementById('login-box').classList.toggle('hidden', !isLogin);
+        document.getElementById('reg-box').classList.toggle('hidden', isLogin);
+        msgBox.style.display = "none";
+    };
+
+    // Durum Takibi
+    onAuthStateChanged(auth, (user) => {
+        if (user && user.emailVerified) {
+            document.getElementById('login-box').classList.add('hidden');
+            document.getElementById('reg-box').classList.add('hidden');
+            document.getElementById('dash-box').classList.remove('hidden');
+        } else {
+            document.getElementById('dash-box').classList.add('hidden');
+            document.getElementById('login-box').classList.remove('hidden');
+        }
+    });
+
+    // Kayıt
+    document.getElementById('btn-reg').onclick = async () => {
+        try {
+            const res = await createUserWithEmailAndPassword(auth, document.getElementById('r-email').value, document.getElementById('r-pass').value);
+            await sendEmailVerification(res.user);
+            showMsg("Doğrulama e-postası gönderildi!", false);
+        } catch (e) { showMsg("Hata: " + e.message); }
+    };
+
+    // Giriş
+    document.getElementById('btn-login').onclick = async () => {
+        try {
+            const res = await signInWithEmailAndPassword(auth, document.getElementById('l-email').value, document.getElementById('l-pass').value);
+            if (!res.user.emailVerified) {
+                showMsg("Lütfen e-postanızı onaylayın.");
+                await signOut(auth);
+            }
+        } catch (e) { showMsg("Giriş başarısız."); }
+    };
+
+    // Şifre Sıfırla
+    document.getElementById('btn-reset').onclick = async () => {
+        const email = document.getElementById('l-email').value;
+        if(!email) return showMsg("E-posta alanını doldurun.");
+        try {
+            await sendPasswordResetEmail(auth, email);
+            showMsg("Sıfırlama linki gönderildi.", false);
+        } catch (e) { showMsg("Hata oluştu."); }
+    };
+
+    // Çıkış
+    document.getElementById('btn-logout').onclick = () => signOut(auth);
+
 </script>
 </body>
 </html>
