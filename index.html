@@ -3,20 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giriş Sistemi - Yakında</title>
+    <title>Giriş Sistemi + reCAPTCHA</title>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { background: #fff; padding: 2rem; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); width: 350px; text-align: center; }
+        .container { background: #fff; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 380px; text-align: center; }
         h2 { margin-top: 0; color: #1c1e21; }
         input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #0866ff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 10px; }
-        button:hover { background: #0055d4; }
-        .logout-btn { background: #dc3545; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 10px; transition: 0.3s; }
+        .btn-primary { background: #0866ff; color: white; }
+        .btn-google { background: white; color: #757575; border: 1px solid #ddd; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 15px; }
+        .g-recaptcha { margin: 15px 0; display: flex; justify-content: center; }
         .msg { margin: 10px 0; padding: 10px; border-radius: 4px; font-size: 13px; display: none; }
         .error { display: block; background: #ffebe8; color: #d0342c; }
         .success { display: block; background: #e7f3ff; color: #0866ff; }
         .link { color: #0866ff; cursor: pointer; font-size: 14px; margin-top: 15px; display: inline-block; }
         .hidden { display: none !important; }
+        .logout-btn { background: #dc3545; color: white; }
     </style>
 </head>
 <body>
@@ -24,34 +27,45 @@
 <div class="container">
     <div id="info-msg" class="msg"></div>
 
-    <div id="login-box">
-        <h2>Giriş Yap</h2>
-        <input type="email" id="l-email" placeholder="E-posta">
-        <input type="password" id="l-pass" placeholder="Şifre">
-        <button id="btn-login">Giriş</button>
-        <span class="link" id="btn-reset">Şifremi Unuttum</span><br>
-        <span class="link" onclick="toggleView(false)">Hesabınız yok mu? Kaydol</span>
-    </div>
+    <div id="auth-box">
+        <h2 id="form-title">Giriş Yap</h2>
+        <input type="email" id="email" placeholder="E-posta">
+        <input type="password" id="pass" placeholder="Şifre">
+        
+        <div class="g-recaptcha" data-sitekey="6Lc6dlEsAAAAAKaulHC_U9SSYTKiwjFVVvbLB05j"></div>
 
-    <div id="reg-box" class="hidden">
-        <h2>Kaydol</h2>
-        <input type="email" id="r-email" placeholder="E-posta">
-        <input type="password" id="r-pass" placeholder="Şifre (Min 6 karakter)">
-        <button id="btn-reg">Hesap Oluştur</button>
-        <span class="link" onclick="toggleView(true)">Zaten hesabınız var mı? Giriş Yap</span>
+        <button id="btn-login" class="btn-primary">Giriş Yap</button>
+        
+        <div style="margin: 10px 0; color: #888; font-size: 12px;">VEYA</div>
+        
+        <button id="btn-google" class="btn-google">
+            <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg" width="20">
+            Google ile Devam Et
+        </button>
+
+        <div id="toggle-text" class="link">Hesabınız yok mu? Kaydol</div>
     </div>
 
     <div id="dash-box" class="hidden">
         <h1 style="color:#0866ff">Çok Yakında!</h1>
-        <p>Uygulamamız geliştirme aşamasındadır.</p>
+        <p id="user-info"></p>
         <button id="btn-logout" class="logout-btn">Çıkış Yap</button>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, onAuthStateChanged, signOut } 
-    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { 
+        getAuth, 
+        signInWithEmailAndPassword, 
+        createUserWithEmailAndPassword,
+        signInWithPopup, 
+        GoogleAuthProvider, 
+        onAuthStateChanged, 
+        signOut,
+        setPersistence,
+        browserLocalPersistence 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDky0jC4vlRZ66D10kp8GEXXryymaPFY2Q",
@@ -65,61 +79,72 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
 
-    const msgBox = document.getElementById('info-msg');
+    // OTOMATİK GİRİŞ AYARI (Local Persistence)
+    // Bu kod oturumun tarayıcı kapatılsa bile kalmasını sağlar.
+    setPersistence(auth, browserLocalPersistence);
+
+    let isLoginMode = true;
 
     function showMsg(txt, err = true) {
+        const msgBox = document.getElementById('info-msg');
         msgBox.textContent = txt;
         msgBox.className = err ? "msg error" : "msg success";
         msgBox.style.display = "block";
     }
 
-    window.toggleView = (isLogin) => {
-        document.getElementById('login-box').classList.toggle('hidden', !isLogin);
-        document.getElementById('reg-box').classList.toggle('hidden', isLogin);
-        msgBox.style.display = "none";
-    };
-
-    // Durum Takibi
+    // Kullanıcı Durum Takibi
     onAuthStateChanged(auth, (user) => {
-        if (user && user.emailVerified) {
-            document.getElementById('login-box').classList.add('hidden');
-            document.getElementById('reg-box').classList.add('hidden');
+        if (user) {
+            document.getElementById('auth-box').classList.add('hidden');
             document.getElementById('dash-box').classList.remove('hidden');
+            document.getElementById('user-info').textContent = "Aktif Kullanıcı: " + user.email;
         } else {
             document.getElementById('dash-box').classList.add('hidden');
-            document.getElementById('login-box').classList.remove('hidden');
+            document.getElementById('auth-box').classList.remove('hidden');
         }
     });
 
-    // Kayıt
-    document.getElementById('btn-reg').onclick = async () => {
-        try {
-            const res = await createUserWithEmailAndPassword(auth, document.getElementById('r-email').value, document.getElementById('r-pass').value);
-            await sendEmailVerification(res.user);
-            showMsg("Doğrulama e-postası gönderildi!", false);
-        } catch (e) { showMsg("Hata: " + e.message); }
+    // Form Değiştirme
+    document.getElementById('toggle-text').onclick = () => {
+        isLoginMode = !isLoginMode;
+        document.getElementById('form-title').textContent = isLoginMode ? "Giriş Yap" : "Kaydol";
+        document.getElementById('btn-login').textContent = isLoginMode ? "Giriş Yap" : "Hesap Oluştur";
+        document.getElementById('toggle-text').textContent = isLoginMode ? "Hesabınız yok mu? Kaydol" : "Zaten hesabınız var mı? Giriş Yap";
     };
 
-    // Giriş
+    // Giriş / Kayıt İşlemi
     document.getElementById('btn-login').onclick = async () => {
+        // reCAPTCHA Kontrolü
+        const captchaResponse = grecaptcha.getResponse();
+        if (captchaResponse.length == 0) {
+            showMsg("Lütfen robot olmadığınızı doğrulayın!");
+            return;
+        }
+
+        const email = document.getElementById('email').value;
+        const pass = document.getElementById('pass').value;
+
         try {
-            const res = await signInWithEmailAndPassword(auth, document.getElementById('l-email').value, document.getElementById('l-pass').value);
-            if (!res.user.emailVerified) {
-                showMsg("Lütfen e-postanızı onaylayın.");
-                await signOut(auth);
+            if(isLoginMode) {
+                await signInWithEmailAndPassword(auth, email, pass);
+            } else {
+                await createUserWithEmailAndPassword(auth, email, pass);
+                showMsg("Kayıt başarılı!", false);
             }
-        } catch (e) { showMsg("Giriş başarısız."); }
+        } catch (e) {
+            showMsg("Hata: " + e.message);
+        }
     };
 
-    // Şifre Sıfırla
-    document.getElementById('btn-reset').onclick = async () => {
-        const email = document.getElementById('l-email').value;
-        if(!email) return showMsg("E-posta alanını doldurun.");
+    // Google ile Giriş
+    document.getElementById('btn-google').onclick = async () => {
         try {
-            await sendPasswordResetEmail(auth, email);
-            showMsg("Sıfırlama linki gönderildi.", false);
-        } catch (e) { showMsg("Hata oluştu."); }
+            await signInWithPopup(auth, provider);
+        } catch (e) {
+            showMsg("Google Hatası: " + e.message);
+        }
     };
 
     // Çıkış
