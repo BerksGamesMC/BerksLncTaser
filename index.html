@@ -3,43 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giriş Sistemi | Profesyonel</title>
+    <title>Ana Menü | Uygulama Portalı</title>
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <style>
-        :root { --primary: #0866ff; --danger: #dc3545; --bg: #f0f2f5; }
+        :root { --primary: #0866ff; --danger: #dc3545; --bg: #f0f2f5; --card: #ffffff; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
         
-        .container { background: #fff; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 380px; text-align: center; box-sizing: border-box; }
-        h2 { margin-bottom: 5px; color: #1c1e21; font-size: 24px; }
-        p.desc { color: #606770; font-size: 14px; margin-bottom: 20px; }
+        .container { background: var(--card); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 400px; overflow: hidden; position: relative; }
         
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #dddfe2; border-radius: 6px; box-sizing: border-box; font-size: 15px; }
-        input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 2px #e7f3ff; }
-        
-        button { width: 100%; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 10px; transition: 0.2s; }
-        .btn-main { background: var(--primary); color: white; }
-        .btn-main:hover { background: #0055d4; }
-        
-        .btn-google { background: white; color: #5f6368; border: 1px solid #dadce0; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 15px; }
-        .btn-google:hover { background: #f8f9fa; }
-        .btn-google img { width: 18px; }
+        /* Profil Barı */
+        .profile-bar { display: flex; align-items: center; padding: 15px 20px; background: #f8f9fa; border-bottom: 1px solid #eee; gap: 12px; }
+        .profile-bar img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--primary); }
+        .user-info { text-align: left; flex-grow: 1; }
+        .user-info .name { font-weight: bold; font-size: 15px; color: #1c1e21; display: block; }
+        .user-info .email { font-size: 12px; color: #606770; display: block; }
 
-        .g-recaptcha { margin: 15px 0; display: flex; justify-content: center; }
+        /* İçerik Alanı */
+        .content { padding: 30px 20px; text-align: center; }
+        .main-ui h2 { color: var(--primary); margin: 0 0 10px 0; }
+        .apk-notice { background: #e7f3ff; color: #0866ff; padding: 15px; border-radius: 10px; border-left: 5px solid var(--primary); margin: 20px 0; font-weight: 500; font-size: 14px; }
         
-        .msg-box { margin-bottom: 15px; padding: 10px; border-radius: 6px; font-size: 13px; display: none; border: 1px solid; }
-        .msg-error { background: #ffebe8; color: #d0342c; border-color: #f5c2c7; display: block; }
-        .msg-success { background: #e7f3ff; color: #0866ff; border-color: #b6d4fe; display: block; }
+        /* Formlar */
+        .auth-form { padding: 25px; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #dddfe2; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.2s; }
+        .btn-main { background: var(--primary); color: white; margin-top: 10px; }
+        .btn-google { background: white; color: #5f6368; border: 1px solid #dadce0; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 15px; }
+        .btn-logout { background: none; color: var(--danger); font-size: 13px; margin-top: 10px; text-decoration: underline; }
 
-        .divider { margin: 20px 0; display: flex; align-items: center; color: #8b949e; font-size: 12px; text-transform: uppercase; }
-        .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: #dbdbdb; margin: 0 10px; }
+        .msg-box { padding: 10px; font-size: 13px; display: none; margin: 10px; border-radius: 6px; }
+        .error { background: #ffebe8; color: #d0342c; display: block; }
+        .success { background: #e7f3ff; color: #0866ff; display: block; }
         
-        .footer-links { margin-top: 20px; font-size: 14px; }
-        .link { color: var(--primary); cursor: pointer; font-weight: 600; text-decoration: none; }
         .hidden { display: none !important; }
-
-        /* Dashboard */
-        .dash-card h1 { color: var(--primary); margin-bottom: 10px; }
-        .logout-btn { background: var(--danger); color: white; margin-top: 20px; }
+        .divider { margin: 15px 0; display: flex; align-items: center; color: #888; font-size: 11px; }
+        .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: #ddd; margin: 0 10px; }
     </style>
 </head>
 <body>
@@ -47,36 +45,39 @@
 <div class="container">
     <div id="info-msg" class="msg-box"></div>
 
-    <div id="auth-ui">
-        <h2 id="title">Giriş Yap</h2>
-        <p class="desc" id="subtitle">Uygulamaya erişmek için bilgilerinizi girin.</p>
-        
-        <input type="email" id="email" placeholder="E-posta Adresi">
+    <div id="auth-ui" class="auth-form">
+        <h2 id="title">Hoş Geldiniz</h2>
+        <input type="email" id="email" placeholder="E-posta">
         <input type="password" id="pass" placeholder="Şifre">
-        
         <div class="g-recaptcha" data-sitekey="6Lc6dlEsAAAAAKaulHC_U9SSYTKiwjFVVvbLB05j"></div>
-
         <button id="btn-action" class="btn-main">Giriş Yap</button>
-        
-        <div class="divider">veya</div>
-        
+        <div class="divider">VEYA</div>
         <button id="btn-google" class="btn-google">
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" alt="G">
-            Google ile Devam Et
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" width="18"> Google ile Giriş
         </button>
-
-        <div class="footer-links">
+        <p style="font-size: 13px; margin-top: 15px;">
             <span id="toggle-text">Hesabınız yok mu?</span> 
-            <span class="link" id="toggle-btn">Kaydol</span>
-        </div>
+            <span style="color:var(--primary); cursor:pointer; font-weight:600" id="toggle-btn">Kaydol</span>
+        </p>
     </div>
 
-    <div id="dash-ui" class="hidden">
-        <div class="dash-card">
-            <h1>Çok Yakında!</h1>
-            <p id="user-welcome" style="font-weight: bold;"></p>
-            <p style="color: #666; font-size: 14px;">Platformumuz geliştirme aşamasındadır. Takipte kalın.</p>
-            <button id="btn-logout" class="logout-btn">Güvenli Çıkış</button>
+    <div id="main-ui" class="hidden">
+        <div class="profile-bar">
+            <img id="user-photo" src="https://via.placeholder.com/45" alt="Profil">
+            <div class="user-info">
+                <span class="name" id="user-display-name">Kullanıcı Adı</span>
+                <span class="email" id="user-email">email@example.com</span>
+            </div>
+            <button id="btn-logout" class="btn-logout">Çıkış</button>
+        </div>
+
+        <div class="content">
+            <h2>Ana Menü</h2>
+            <p style="color:#666; font-size: 14px;">Şu an içerik hazırlıyoruz.</p>
+            
+            <div class="apk-notice">
+                🚀 <strong>Duyuru:</strong> Çok yakında yeni APK dosyaları buraya eklenecektir. Takipte kalın!
+            </div>
         </div>
     </div>
 </div>
@@ -102,57 +103,47 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
-
-    // Oturumu Kalıcı Yap
     setPersistence(auth, browserLocalPersistence);
 
     let isLogin = true;
 
-    // Hata Türkçeleştirme
-    function getTrError(code) {
-        switch (code) {
-            case 'auth/user-disabled': return "Bu hesap kapatılmıştır.";
-            case 'auth/invalid-credential': return "E-posta veya şifre hatalı.";
-            case 'auth/email-already-in-use': return "Bu e-posta zaten kullanımda.";
-            case 'auth/weak-password': return "Şifre en az 6 karakter olmalıdır.";
-            case 'auth/too-many-requests': return "Çok fazla deneme yapıldı. Lütfen bekleyin.";
-            case 'auth/popup-closed-by-user': return "Google penceresi kapatıldı.";
-            default: return "Bir hata oluştu, lütfen tekrar deneyin.";
-        }
-    }
-
     function showMsg(txt, type = 'error') {
         const msgBox = document.getElementById('info-msg');
         msgBox.textContent = txt;
-        msgBox.className = `msg-box msg-${type}`;
-        setTimeout(() => { msgBox.className = 'msg-box'; }, 5000);
+        msgBox.className = `msg-box ${type}`;
+        msgBox.style.display = 'block';
+        setTimeout(() => { msgBox.style.display = 'none'; }, 4000);
     }
 
     // Görünüm Değiştir
     document.getElementById('toggle-btn').onclick = () => {
         isLogin = !isLogin;
-        document.getElementById('title').textContent = isLogin ? "Giriş Yap" : "Hesap Oluştur";
+        document.getElementById('title').textContent = isLogin ? "Hoş Geldiniz" : "Hesap Oluştur";
         document.getElementById('btn-action').textContent = isLogin ? "Giriş Yap" : "Kaydol";
         document.getElementById('toggle-text').textContent = isLogin ? "Hesabınız yok mu?" : "Zaten üye misiniz?";
         document.getElementById('toggle-btn').textContent = isLogin ? "Kaydol" : "Giriş Yap";
     };
 
-    // Oturum Takibi
+    // Kullanıcı Durum Takibi
     onAuthStateChanged(auth, (user) => {
         if (user) {
             document.getElementById('auth-ui').classList.add('hidden');
-            document.getElementById('dash-ui').classList.remove('hidden');
-            document.getElementById('user-welcome').textContent = "Hoş geldin, " + (user.displayName || user.email);
+            document.getElementById('main-ui').classList.remove('hidden');
+            
+            // Profil Bilgilerini Güncelle
+            document.getElementById('user-display-name').textContent = user.displayName || "Kullanıcı";
+            document.getElementById('user-email').textContent = user.email;
+            document.getElementById('user-photo').src = user.photoURL || "https://ui-avatars.com/api/?name=" + user.email;
         } else {
-            document.getElementById('dash-ui').classList.add('hidden');
+            document.getElementById('main-ui').classList.add('hidden');
             document.getElementById('auth-ui').classList.remove('hidden');
         }
     });
 
-    // Ana İşlem (Giriş/Kayıt)
+    // Giriş/Kayıt Butonu
     document.getElementById('btn-action').onclick = async () => {
         const captcha = grecaptcha.getResponse();
-        if (!captcha) return showMsg("Lütfen bot olmadığınızı doğrulayın.");
+        if (!captcha) return showMsg("Lütfen robot olmadığınızı doğrulayın.");
 
         const email = document.getElementById('email').value;
         const pass = document.getElementById('pass').value;
@@ -162,10 +153,10 @@
                 await signInWithEmailAndPassword(auth, email, pass);
             } else {
                 await createUserWithEmailAndPassword(auth, email, pass);
-                showMsg("Hesabınız oluşturuldu!", "success");
+                showMsg("Kayıt başarılı!", "success");
             }
         } catch (e) {
-            showMsg(getTrError(e.code));
+            showMsg("İşlem başarısız. Bilgileri kontrol edin.");
             grecaptcha.reset();
         }
     };
@@ -175,13 +166,12 @@
         try {
             await signInWithPopup(auth, provider);
         } catch (e) {
-            showMsg(getTrError(e.code));
+            showMsg("Google girişi yapılamadı.");
         }
     };
 
     // Çıkış
     document.getElementById('btn-logout').onclick = () => signOut(auth);
-
 </script>
 </body>
 </html>
